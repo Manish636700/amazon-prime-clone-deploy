@@ -1,0 +1,23 @@
+# Terraform local directories
+**/.terraform/
+**/.terraform/*
+
+# Terraform state files
+**/*.tfstate
+**/*.tfstate.*
+
+# Terraform lock files (optional but recommended to ignore)
+**/.terraform.lock.hcl
+
+# Terraform plan files
+*.tfplan
+abv
+
+# Sensitive files
+*.pem
+*.key
+.env
+
+# OS / Editor
+.DS_Store
+Thumbs.db
