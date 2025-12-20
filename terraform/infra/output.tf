@@ -7,5 +7,10 @@ output "public_subnets" {
 }
 
 output "private_subnets" {
-    value = module.vpc.private_subnets_ids
+  value = module.vpc.private_subnets_ids
 }
+
+output "bastion_public_ip" {
+  value = module.bastion_ec2
+}
+
