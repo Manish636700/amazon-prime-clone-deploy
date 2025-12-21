@@ -26,7 +26,10 @@ resource "aws_security_group" "this" {
 
 }
 
-
+resource "aws_key_pair" "this" {
+    key_name   = var.key_name
+    public_key = var.public_key  
+}
 resource "aws_iam_role" "this" {
   name                = "${var.name}-role"
 
@@ -58,7 +61,7 @@ resource "aws_instance" "this" {
     ami                    = var.ami_id
     instance_type          = var.instance_type
     subnet_id              = var.subnet_id
-    key_name               = var.key_name
+    key_name               = aws_key_pair.this.key_name
     vpc_security_group_ids = [aws_security_group.this.id]
     iam_instance_profile   = aws_iam_instance_profile.this.name  
 

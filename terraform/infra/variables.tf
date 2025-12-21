@@ -33,6 +33,18 @@ variable "private_subnets" {
   }
 }
 
+variable "key_name" {
+  description = "SSH key name"
+  type        = string
+}
+variable "public_key" {
+  description = "ec2 instace public key"
+  type        = string
+  sensitive   = true
+
+  
+}
+
 variable "instance_type" {
   description = "Instance_type"
   type        = string

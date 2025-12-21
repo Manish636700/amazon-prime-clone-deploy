@@ -9,6 +9,7 @@ variable "ami_id" {
   
 }
 
+
 variable "instance_type" {
     description = " ec2 instance type"
     type        = string
@@ -21,16 +22,25 @@ variable "key_name" {
 
 }
 
-variable "subnet_id" {
-    description = "subnet id where the ec2 instance"
+variable "public_key" {
+    description = "Public key for the ec2 instance"
     type        = string
+    sensitive   = true 
+  
 }
+
+
 
 variable "vpc_id" {
   description    = "VPC Id for the security group"
   type           = string
 }
 
+
+variable "subnet_id" {
+    description = "subnet id where the ec2 instance"
+    type        = string
+}
 variable "volume_size" {
     description = "Root EBS volume size in GB"
     type        = number
@@ -45,4 +55,5 @@ variable "ingress_rules" {
         protocol         = string
         cidr_blocks      = list(string)
     }))
+
 }
