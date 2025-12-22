@@ -1,0 +1,44 @@
+---
+
+- name: Install Docker
+  hosts: docker_hosts
+  become: yes
+  roles:
+    - docker
+
+- name: Install jenkins
+  hosts: jenkins
+  become: yes
+  roles:
+    - jenkins
+
+- name: Install SonarQube
+  hosts: sonarqube 
+  become: yes
+  roles:
+    - sonarqube
+
+- name: install Trivy
+  hosts: security
+  become: yes
+  roles:
+    - trivy
+
+- name: Setup nodejs
+  hosts: nodejs
+  become: yes
+  roles:
+    - nodejs
+
+
+- name: Install Prometheus
+  hosts: prometheus 
+  become: yes
+  roles:
+    - prometheus
+
+- name: Install Grafana
+  hosts: grafana
+  become: yes
+  roles:
+    - grafana

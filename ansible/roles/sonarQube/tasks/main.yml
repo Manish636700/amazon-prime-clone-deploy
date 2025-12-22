@@ -1,0 +1,99 @@
+---
+- name: Install required packages
+  dnf:
+    name:
+      - java-17-amazon-corretto
+      - unzip
+      - wget
+      - postgresql15
+      - postgresql15-server
+    state: present
+    update_cache: yes
+
+- name: Initialize PostgreSQL
+  command: postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/PG_VERSION
+
+- name: Enable and start PostgreSQL
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Create SonarQube system user
+  user:
+    name: "{{ sonarqube_user }}"
+    shell: /bin/bash
+    system: yes
+
+- name: Download SonarQube
+  get_url:
+    url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
+    dest: /tmp/sonarqube.zip
+
+- name: Extract SonarQube
+  unarchive:
+    src: /tmp/sonarqube.zip
+    dest: /opt/
+    remote_src: yes
+
+- name: Rename SonarQube directory
+  command: mv /opt/sonarqube-{{ sonarqube_version }} {{ sonarqube_home }}
+  args:
+    creates: "{{ sonarqube_home }}"
+
+- name: Set ownership
+  file:
+    path: "{{ sonarqube_home }}"
+    owner: "{{ sonarqube_user }}"
+    group: "{{ sonarqube_user }}"
+    recurse: yes
+
+- name: Kernel tuning (required by SonarQube)
+  copy:
+    dest: /etc/sysctl.d/99-sonarqube.conf
+    content: |
+      vm.max_map_count=262144
+      fs.file-max=65536
+  notify: reload sysctl
+
+- name: Apply sysctl
+  command: sysctl -p /etc/sysctl.d/99-sonarqube.conf
+
+- name: Configure SonarQube
+  template:
+    src: sonar.properties.j2
+    dest: "{{ sonarqube_home }}/conf/sonar.properties"
+    owner: "{{ sonarqube_user }}"
+    group: "{{ sonarqube_user }}"
+
+- name: Create SonarQube service
+  copy:
+    dest: /etc/systemd/system/sonarqube.service
+    content: |
+      [Unit]
+      Description=SonarQube service
+      After=syslog.target network.target
+
+      [Service]
+      Type=forking
+      ExecStart={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh start
+      ExecStop={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh stop
+      User={{ sonarqube_user }}
+      Group={{ sonarqube_user }}
+      Restart=always
+      LimitNOFILE=65536
+      LimitNPROC=4096
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Start SonarQube
+  service:
+    name: sonarqube
+    state: started
+    enabled: yes

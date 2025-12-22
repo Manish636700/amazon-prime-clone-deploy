@@ -1,0 +1,20 @@
+; [docker_hosts]
+; docker1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [jenkins]
+; jenkins1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [sonarqube]
+; sonar1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [security]
+; trivy1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [nodejs]
+; nodejs1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [prometheus]
+; prometheus1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}
+
+; [grafana]
+; grafana1 ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER}

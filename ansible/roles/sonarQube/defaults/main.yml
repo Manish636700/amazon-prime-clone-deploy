@@ -1,0 +1,6 @@
+sonarqube_version: "10.4.1.88267"
+sonarqube_user: sonar
+sonarqube_home: /opt/sonarqube
+postgres_db: sonarqube
+postgres_user: sonar
+postgres_password: sonar123

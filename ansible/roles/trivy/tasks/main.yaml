@@ -1,0 +1,48 @@
+---
+- name: Install required packages
+  dnf:
+    name:
+      - wget
+      - ca-certificates
+      - cronie
+    state: present
+    update_cache: yes
+  
+- name: Start and enable cron
+  service:
+    name: crond
+    state: started
+    enabled: yes
+
+- name: Add Trivy repository
+  copy:
+    dest: /etc/yum.repos.d/trivy.repo
+    content: |
+      [trivy]
+      name=Trivy repository
+      baseurl=https://aquasecurity.github.io/trivy-repo/rpm/releases/$basearch/
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://aquasecurity.github.io/trivy-repo/rpm/public.key
+
+- name: Install Trivy
+  dnf:
+    name: trivy
+    state: present
+    update_cache: yes
+
+- name: Verify Trivy installation
+  command: trivy --version
+  register: trivy_version
+  changed_when: false
+
+- name: Show Trivy version
+  debug:
+    msg: "Trivy version: {{ trivy_version.stdout }}"
+
+- name: Schedule Trivy DB update
+  cron:
+    name: "Trivy DB update"
+    minute: "0"
+    hour: "2"
+    job: "/usr/bin/trivy image --download-db-only"
