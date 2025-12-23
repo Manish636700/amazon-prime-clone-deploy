@@ -21,3 +21,39 @@ module "bastion_ec2" {
 
 
 }
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name = "amazon-prime-prod"
+  tags = {
+    Environment = "production"
+    Project     = "amazon-prime-clone"
+    Owner       = "devops"
+  }
+}
+
+module "eks" {
+  source = "./modules/eks"
+
+
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+
+  vpc_id          = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets_ids
+
+  eks_managed_node_groups = {
+    on_demand = {
+      name           = "on-demand-ng"
+      capacity_type  = "ON_DEMAND"
+      instance_types = ["t3.medium"]
+
+      min_size     = 2
+      max_size     = 5
+      desired_size = 2
+    }
+  }
+
+  tags = var.tags
+}

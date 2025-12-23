@@ -27,7 +27,7 @@ INFRA_DIR="${TERRAFORM_DIR}/infra"
 ANSIBLE_DIR="${ROOT_DIR}/ansible"
 INVENTORY_FILE="${ANSIBLE_DIR}/inventory"
 
-SSH_USER= "ec2-user"
+SSH_USER="ec2-user"
 # -------------------------------
 # Pre-checks
 # -------------------------------
@@ -53,8 +53,11 @@ echo "✅ SSH Key Generated Successfully"
 # Export Terraform Variables
 # -------------------------------
 export TF_VAR_key_name="${KEY_NAME}"
-export TF_VAR_public_key="$(cat ${KEY_PATH}.pub)"
-
+TFVARS_FILE="${INFRA_DIR}/terraform.auto.tfvars" 
+cat <<EOF > "${TFVARS_FILE}" 
+key_name = "${KEY_NAME}" 
+public_key = "$(cat ${KEY_PATH}.pub)" 
+EOF
 echo "📦 Exported Terraform Variables"
 
 # -------------------------------

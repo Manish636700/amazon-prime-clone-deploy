@@ -69,3 +69,27 @@ variable "ingress_rules" {
     cidr_blocks    = list(string)
   }))
 }
+
+variable "aws_region" {
+  default  = "ap-south-1"
+}
+
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name"
+}
+
+variable "cluster_version" {
+  type        = string
+  default     = "1.29"
+}
+
+variable "environment" {
+  type        = string
+  default     = "production"
+}
+
+variable "tags" {
+  description = "common resource tags"
+  type        = map(string)
+}

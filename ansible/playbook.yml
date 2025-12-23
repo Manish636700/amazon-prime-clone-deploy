@@ -16,7 +16,7 @@
   hosts: sonarqube 
   become: yes
   roles:
-    - sonarqube
+    - sonarQube
 
 - name: install Trivy
   hosts: security
