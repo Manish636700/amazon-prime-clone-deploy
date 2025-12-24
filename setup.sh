@@ -167,3 +167,8 @@ ansible-playbook playbook.yml
 echo "============================================"
 echo " ✅ Production Infrastructure Ready"
 echo "============================================"
+
+echo "jenkins access :- http://${INSTANCE_IP}:8080"
+echo "sonarqube access :- http://${INSTANCE_IP}:9000"
+echo "prometheus access :- http://${INSTANCE_IP}:9090"
+echo "grafana access :- http://${INSTANCE_IP}:3000"
