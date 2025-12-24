@@ -1,87 +1,76 @@
 ---
-- name: Install required packages
-  dnf:
+- name: Install Java & tools
+  yum:
     name:
       - java-17-amazon-corretto
       - unzip
       - wget
-      - postgresql15
-      - postgresql15-server
     state: present
-    update_cache: yes
 
-- name: Initialize PostgreSQL
-  command: postgresql-setup --initdb
-  args:
-    creates: /var/lib/pgsql/data/PG_VERSION
+- name: Set vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    state: present
+    reload: yes
 
-- name: Enable and start PostgreSQL
-  service:
-    name: postgresql
-    state: started
-    enabled: yes
+- name: Set file limits
+  copy:
+    dest: /etc/security/limits.d/99-sonarqube.conf
+    content: |
+      sonar   -   nofile   65536
+      sonar   -   nproc    4096
 
-- name: Create SonarQube system user
+- name: Create sonar user
   user:
-    name: "{{ sonarqube_user }}"
-    shell: /bin/bash
+    name: sonar
     system: yes
 
 - name: Download SonarQube
   get_url:
-    url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
-    dest: /tmp/sonarqube.zip
+    url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.6.92038.zip
+    dest: /opt/sonarqube.zip
 
 - name: Extract SonarQube
   unarchive:
-    src: /tmp/sonarqube.zip
+    src: /opt/sonarqube.zip
     dest: /opt/
     remote_src: yes
 
-- name: Rename SonarQube directory
-  command: mv /opt/sonarqube-{{ sonarqube_version }} {{ sonarqube_home }}
+- name: Rename directory
+  command: mv /opt/sonarqube-9.9.6.92038 /opt/sonarqube
   args:
-    creates: "{{ sonarqube_home }}"
+    creates: /opt/sonarqube
 
 - name: Set ownership
   file:
-    path: "{{ sonarqube_home }}"
-    owner: "{{ sonarqube_user }}"
-    group: "{{ sonarqube_user }}"
+    path: /opt/sonarqube
+    owner: sonar
+    group: sonar
     recurse: yes
 
-- name: Kernel tuning (required by SonarQube)
-  copy:
-    dest: /etc/sysctl.d/99-sonarqube.conf
-    content: |
-      vm.max_map_count=262144
-      fs.file-max=65536
-  notify: reload sysctl
-
-- name: Apply sysctl
-  command: sysctl -p /etc/sysctl.d/99-sonarqube.conf
-
-- name: Configure SonarQube
+- name: Configure sonar.properties
   template:
     src: sonar.properties.j2
-    dest: "{{ sonarqube_home }}/conf/sonar.properties"
-    owner: "{{ sonarqube_user }}"
-    group: "{{ sonarqube_user }}"
+    dest: /opt/sonarqube/conf/sonar.properties
+    owner: sonar
+    group: sonar
+  notify: restart sonarqube
 
 - name: Create SonarQube service
   copy:
     dest: /etc/systemd/system/sonarqube.service
     content: |
       [Unit]
-      Description=SonarQube service
-      After=syslog.target network.target
+      Description=SonarQube
+      After=network.target postgresql.service
 
       [Service]
       Type=forking
-      ExecStart={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh start
-      ExecStop={{ sonarqube_home }}/bin/linux-x86-64/sonar.sh stop
-      User={{ sonarqube_user }}
-      Group={{ sonarqube_user }}
+      User=sonar
+      Group=sonar
+      ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+      ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
       Restart=always
       LimitNOFILE=65536
       LimitNPROC=4096
@@ -89,11 +78,9 @@
       [Install]
       WantedBy=multi-user.target
 
-- name: Reload systemd
-  command: systemctl daemon-reload
-
 - name: Start SonarQube
-  service:
+  systemd:
     name: sonarqube
     state: started
     enabled: yes
+    daemon_reload: yes

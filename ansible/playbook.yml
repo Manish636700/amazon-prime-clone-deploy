@@ -5,17 +5,24 @@
   become: yes
   roles:
     - docker
+  tags:
+    - docker
 
 - name: Install jenkins
   hosts: jenkins
   become: yes
   roles:
     - jenkins
+  tags:
+    - jenkins
 
 - name: Install SonarQube
   hosts: sonarqube 
   become: yes
   roles:
+    - postgresql
+    - sonarQube
+  tags:
     - sonarQube
 
 - name: install Trivy
@@ -23,11 +30,15 @@
   become: yes
   roles:
     - trivy
+  tags:
+    - trivy
 
 - name: Setup nodejs
   hosts: nodejs
   become: yes
   roles:
+    - nodejs
+  tags:
     - nodejs
 
 
@@ -36,9 +47,13 @@
   become: yes
   roles:
     - prometheus
+  tags:
+    - prometheus
 
 - name: Install Grafana
   hosts: grafana
   become: yes
   roles:
+    - grafana
+  tags:
     - grafana

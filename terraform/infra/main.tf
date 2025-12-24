@@ -44,10 +44,9 @@ module "eks" {
   private_subnets = module.vpc.private_subnets_ids
 
   eks_managed_node_groups = {
-    on_demand = {
-      name           = "on-demand-ng"
-      capacity_type  = "ON_DEMAND"
-      instance_types = ["t3.medium"]
+    panda-node = {
+      capacity_type  = "SPOT"
+      instance_types = ["t2.medium"]
 
       min_size     = 2
       max_size     = 5

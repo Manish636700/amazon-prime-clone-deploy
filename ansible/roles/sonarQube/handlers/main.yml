@@ -1,3 +1,5 @@
 ---
-- name: reload sysctl
-  command: sysctl --system
+- name: restart sonarqube
+  systemd:
+    name: sonarqube
+    state: restarted

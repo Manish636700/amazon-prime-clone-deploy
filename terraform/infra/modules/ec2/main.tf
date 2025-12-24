@@ -77,6 +77,8 @@ resource "aws_instance" "this" {
         encrypted             = true
         delete_on_termination = true  
     }
+    user_data = file("${path.module}/userdata.sh")
+
 
     tags = {
         Name        = var.name

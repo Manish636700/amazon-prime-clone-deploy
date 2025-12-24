@@ -10,20 +10,18 @@ This project demonstrates a real-world, production-grade DevOps implementation f
 devops-prime-video/
 │
 ├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   └── backend.tf
+│   ├── backend/
+│   ├── infra/
+│       ├── modules/
+│       └── backend.tf
+│       └── main tf files
 │
 ├── ansible/
-│   └── install-jenkins.yml
-│
-├── k8s/
-│   ├── deployment.yaml
-│   └── service.yaml
-│
-├── Jenkinsfile
+│   └── role/
+│       └── jenkins/
+│       └── sonarqube.....etc/
+│   └── invertroy
+│   └── playbook
 ├── README.md
 └── .gitignore
 ```
