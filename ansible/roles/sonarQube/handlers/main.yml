@@ -1,5 +1,0 @@
----
-- name: restart sonarqube
-  systemd:
-    name: sonarqube
-    state: restarted
