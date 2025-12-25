@@ -1,6 +1,6 @@
 #!/bin/bash
 
-yum install -y firewalld
+yum install -y firewalld git
 systemctl start firewalld
 systemctl enable firewalld
 
