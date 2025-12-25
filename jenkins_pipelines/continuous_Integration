@@ -1,0 +1,84 @@
+pipeline {
+    agent any
+    
+    environment {
+        IMAGE_NAME = "manishdevops/app"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
+        SONAR_ENV  = "sonarqube"
+    }
+    
+    stages {
+        stage('checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Manish636700/amazon-prime-clone-deploy.git'
+            }
+        }
+        
+        stage('sonarQube Code Analysis') {
+            steps {
+                withSonarQubeEnv("${SONAR_ENV}") {
+                    sh """ 
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=ci-app \
+                    -Dsonar.projectName=ci-app
+                    """
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: "MINUTES") {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('Trivy File System Scan') {
+            steps {
+                sh """ 
+                trivy fs --severity HIGH,CRITICAL .
+                """
+            }
+        }
+        
+        stage("Build Docker Image") {
+            steps {
+                sh """ 
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
+            }
+        }
+        
+        stage('Trivy Image Scan') {
+            steps {
+                sh """
+                trivy image --severity HIGH, CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
+                """
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
+                withCredentials ([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                    )])
+                    {
+                        sh """ 
+                        docker login -u $DOCKER_USER -p $DOCKER_PASS
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        """
+                    }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Continuous Integration Completed Successfully"
+        }
+        failure {
+            echo "Continuous Pipeline Faild"
+        }
+    }
+}

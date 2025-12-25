@@ -1,8 +1,8 @@
 ---
 # ===============================
-# INSTALL POSTGRESQL
+# INSTALL POSTGRESQL 15
 # ===============================
-- name: Install PostgreSQL
+- name: Install PostgreSQL packages
   yum:
     name:
       - postgresql15
@@ -11,23 +11,23 @@
     update_cache: yes
 
 # ===============================
-# INIT DB (RUNS ONLY ONCE)
+# INITIALIZE DATABASE (RUN ONCE)
 # ===============================
-- name: Initialize PostgreSQL (one-time)
+- name: Initialize PostgreSQL database
   command: postgresql-setup --initdb
   args:
     creates: /var/lib/pgsql/data/PG_VERSION
 
 # ===============================
-# START SERVICE
+# START & ENABLE SERVICE
 # ===============================
-- name: Start PostgreSQL
+- name: Start and enable PostgreSQL
   systemd:
     name: postgresql
     state: started
     enabled: yes
 
-- name: Wait for PostgreSQL
+- name: Wait for PostgreSQL to be ready
   shell: pg_isready
   register: pg_ready
   retries: 10
@@ -36,37 +36,30 @@
   changed_when: false
 
 # ===============================
-# AUTH CONFIG (IDEMPOTENT)
+# AUTH CONFIG (BULLETPROOF)
 # ===============================
+# IMPORTANT:
+# PostgreSQL reads pg_hba.conf top → bottom
+# We fully control this file to avoid IDENT issues
+- name: Enforce PostgreSQL authentication for SonarQube
+  copy:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+    content: |
+      # TYPE  DATABASE        USER            ADDRESS                 METHOD
 
-# Remove any conflicting postgres rules
-- name: Remove conflicting postgres auth rules
-  lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    regexp: '^local\s+all\s+postgres\s+'
-    state: absent
-  notify: restart postgresql
-
-# Ensure peer auth for postgres user (TOP of file)
-- name: Ensure peer auth for postgres user
-  lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    insertafter: BOF
-    line: 'local   all   postgres   peer'
-  notify: restart postgresql
-
-# Enforce md5 for all other local users
-- name: Enforce md5 auth for local users
-  lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    regexp: '^local\s+all\s+all\s+'
-    line: 'local   all   all   md5'
+      local   all             postgres                                peer
+      local   all             all                                     md5
+      host    all             all             127.0.0.1/32            md5
+      host    all             all             ::1/128                 md5
   notify: restart postgresql
 
 - meta: flush_handlers
 
 # ===============================
-# VERIFY AUTH (FAIL FAST)
+# FAIL-FAST AUTH VERIFICATION
 # ===============================
 - name: Verify postgres peer authentication
   shell: sudo -u postgres psql -c "SELECT 1;"
@@ -100,9 +93,9 @@
   changed_when: false
 
 # ===============================
-# PERMISSIONS (SAFE)
+# PERMISSIONS
 # ===============================
-- name: Ensure schema permissions
+- name: Ensure schema permissions for sonar user
   shell: |
     sudo -u postgres psql sonarqube <<EOF
     ALTER SCHEMA public OWNER TO sonar;
