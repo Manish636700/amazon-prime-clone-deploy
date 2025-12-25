@@ -1,0 +1,20 @@
+# Node dependencies
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Infrastructure / DevOps
+terraform
+ansible
+k8s_files
+pipeline_script
+
+# Logs & docs
+*.log
+*.md
+*.docx
+
+# Images / misc
+Overview.png
