@@ -153,6 +153,9 @@ app1
 [grafana]
 app1
 
+[argocd]
+app1
+
 [all:vars]
 ansible_user=${SSH_USER}
 ansible_ssh_private_key_file=${KEY_PATH}

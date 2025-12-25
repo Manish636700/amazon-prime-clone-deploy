@@ -1,0 +1,63 @@
+---
+
+- name: Check kubectl access
+  command: kubectl get nodes 
+  changed_when: false 
+
+
+- name: Create argocd namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: namespace
+    name: argocd
+    state: present
+
+- name: Install ArgoCD manifests
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    src: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+- name: Wait for ArgoCD server
+  command: Kubectl rollout status deployment argocd-server -n argocd
+  retries: 15
+  delay: 20
+  register: rollout
+  until: rollout.rc == 0
+
+- name: Expose ArgoCD using LoadBalancer
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    defirition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: argocd-server
+      spec:
+        type: LoadBalancer
+
+- name: Wait for ArgoCD ELB 
+  command: >
+    kubectl get svc argocd-server -n argocd 
+    -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+  register: argocd_lb
+  retries: 20
+  delay: 15
+  until: argocd_lb.stdout != ''
+
+- name: Get ArgoCD admin PASSWORD
+  command: >
+    kubectl get secret argocd-initial-admin-secret
+    -n argocd
+    -o jsonpath="{.data.password}" | base64 -d 
+  register: argocd_password
+  changed_when: false
+
+- name: Show ArgoCD details
+  debug:
+    msg:
+    - "ArgoCD URL: https://{{ argocd_lb.stout }}"
+    - "Username: admin"
+    - "Password: {{ argocd_password.stdout }}"
+
