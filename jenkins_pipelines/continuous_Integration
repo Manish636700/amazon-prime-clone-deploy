@@ -19,8 +19,8 @@ pipeline {
                 withSonarQubeEnv("${SONAR_ENV}") {
                     sh """ 
                     mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=ci-app \
-                    -Dsonar.projectName=ci-app
+                    -Dsonar.projectKey=amazon-clone \
+                    -Dsonar.projectName=amazon-clone
                     """
                 }
             }
