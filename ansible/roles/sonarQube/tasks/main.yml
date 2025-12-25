@@ -1,0 +1,86 @@
+---
+- name: Install Java & tools
+  yum:
+    name:
+      - java-17-amazon-corretto
+      - unzip
+      - wget
+    state: present
+
+- name: Set vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    state: present
+    reload: yes
+
+- name: Set file limits
+  copy:
+    dest: /etc/security/limits.d/99-sonarqube.conf
+    content: |
+      sonar   -   nofile   65536
+      sonar   -   nproc    4096
+
+- name: Create sonar user
+  user:
+    name: sonar
+    system: yes
+
+- name: Download SonarQube
+  get_url:
+    url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.6.92038.zip
+    dest: /opt/sonarqube.zip
+
+- name: Extract SonarQube
+  unarchive:
+    src: /opt/sonarqube.zip
+    dest: /opt/
+    remote_src: yes
+
+- name: Rename directory
+  command: mv /opt/sonarqube-9.9.6.92038 /opt/sonarqube
+  args:
+    creates: /opt/sonarqube
+
+- name: Set ownership
+  file:
+    path: /opt/sonarqube
+    owner: sonar
+    group: sonar
+    recurse: yes
+
+- name: Configure sonar.properties
+  template:
+    src: sonar.properties.j2
+    dest: /opt/sonarqube/conf/sonar.properties
+    owner: sonar
+    group: sonar
+  notify: restart sonarqube
+
+- name: Create SonarQube service
+  copy:
+    dest: /etc/systemd/system/sonarqube.service
+    content: |
+      [Unit]
+      Description=SonarQube
+      After=network.target postgresql.service
+
+      [Service]
+      Type=forking
+      User=sonar
+      Group=sonar
+      ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+      ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+      Restart=always
+      LimitNOFILE=65536
+      LimitNPROC=4096
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Start SonarQube
+  systemd:
+    name: sonarqube
+    state: started
+    enabled: yes
+    daemon_reload: yes

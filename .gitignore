@@ -1,3 +1,42 @@
-node_modules/
-.git
+# Terraform local directories
+**/.terraform/
+**/.terraform/*
+
+# Terraform state files
+**/*.tfstate
+**/*.tfstate.*
+
+# Terraform lock files (optional but recommended to ignore)
+**/.terraform.lock.hcl
+
+# Terraform plan files
+*.tfplan
+abv
+
+# Sensitive files
+*.pem
+*.key
 .env
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+Create a .gitignore file in root:
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# SSH keys
+ssh/
+*.pem
+*.key
+
+# AWS CLI binaries
+awscliv2.zip
+terraform/backend/aws/
+
+# OS files
+.DS_Store
+Thumbs.db

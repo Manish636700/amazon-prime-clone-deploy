@@ -1,0 +1,34 @@
+---
+- name: Install required tools
+  dnf:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Add NodeSource Node.js {{ nodejs_version }} repo
+  shell: |
+    curl -fsSL https://rpm.nodesource.com/setup_{{ nodejs_version }}.x | bash -
+  args:
+    creates: /etc/yum.repos.d/nodesource-nodejs.repo
+
+- name: Install Node.js and npm
+  dnf:
+    name: nodejs
+    state: present
+
+- name: Verify Node.js installation
+  command: node --version
+  register: node_version
+  changed_when: false
+
+- name: Verify npm installation
+  command: npm --version
+  register: npm_version
+  changed_when: false
+
+- name: Show Node.js and npm versions
+  debug:
+    msg:
+      - "Node.js version: {{ node_version.stdout }}"
+      - "npm version: {{ npm_version.stdout }}"
