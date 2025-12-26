@@ -2,13 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 
 function ContentTile(props) {
-  const [isHovering, setIsHovering] = useState(false);
-  // function handleMouseOver() {
-  //   setIsHovering(true);
-  // }
-  // function handleMouseOut() {
-  //   setIsHovering(false);
-  // }
+  const [setIsHovering] = useState(false);
   const handleMouseOver = () => {
     setIsHovering(true);
   };
