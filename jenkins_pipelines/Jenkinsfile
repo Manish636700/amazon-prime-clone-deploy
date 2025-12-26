@@ -13,6 +13,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Manish636700/amazon-prime-clone-deploy.git'
             }
         }
+        
         stage('SonarQube Analysis') {
             steps {
                 script {
