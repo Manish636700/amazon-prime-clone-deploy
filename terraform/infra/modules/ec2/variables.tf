@@ -16,6 +16,11 @@ variable "instance_type" {
 
 }
 
+variable "subnet_id" {
+    description = "subnet id where the ec2 instance"
+    type        = string
+}
+
 variable "key_name" {
     description = "Ec2 key pair name "
     type        = string
@@ -37,23 +42,21 @@ variable "vpc_id" {
 }
 
 
-variable "subnet_id" {
-    description = "subnet id where the ec2 instance"
-    type        = string
-}
+
 variable "volume_size" {
     description = "Root EBS volume size in GB"
     type        = number
 
 }
 
-variable "ingress_rules" {
-    type = list(object({
-        description      = string
-        from_port        = number
-        to_port          = number
-        protocol         = string
-        cidr_blocks      = list(string)
-    }))
 
+variable "iam_instance_profile" {
+  description = "IAM instance profile name passed from root"
+  type        = string
+}
+
+variable "vpc_security_group_ids" {
+  description = "List of security group IDs to attach to the EC2 instance"
+  type        = list(string)
+  
 }

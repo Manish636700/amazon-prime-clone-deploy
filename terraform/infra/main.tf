@@ -5,6 +5,32 @@ module "vpc" {
   azs             = slice(data.aws_availability_zones.available.names, 0, 2)
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
+  ingress_rules = var.ingress_rules
+  ec2-sg-name         = "prod-bastion"
+}
+
+
+module "eks" {
+  source = "./modules/eks"
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+  vpc_id          = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets_ids
+
+  bastion_role_arn = aws_iam_role.bastion_role.arn
+  source_security_group_id = module.vpc.security_group_id
+
+  eks_managed_node_groups = {
+    panda-node = {
+      capacity_type = "SPOT"
+      instance_types = ["t2.medium"]
+
+      min_size     = 2
+      max_size     = 4
+      desired_size = 2
+    }
+  }
+  tags = var.tags
 }
 
 module "bastion_ec2" {
@@ -17,9 +43,13 @@ module "bastion_ec2" {
   subnet_id     = module.vpc.public_subnet_ids[0]
   vpc_id        = module.vpc.vpc_id
   volume_size   = var.volume_size
-  ingress_rules = var.ingress_rules
+  vpc_security_group_ids = [module.vpc.security_group_id]
+  
 
+  iam_instance_profile = aws_iam_instance_profile.bastion_profile.name
 
+  depends_on = [ module.eks ,
+   aws_iam_instance_profile.bastion_profile ]
 }
 
 module "ecr" {
@@ -33,26 +63,4 @@ module "ecr" {
   }
 }
 
-module "eks" {
-  source = "./modules/eks"
 
-
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
-
-  vpc_id          = module.vpc.vpc_id
-  private_subnets = module.vpc.private_subnets_ids
-
-  eks_managed_node_groups = {
-    panda-node = {
-      capacity_type  = "SPOT"
-      instance_types = ["t2.medium"]
-
-      min_size     = 2
-      max_size     = 5
-      desired_size = 2
-    }
-  }
-
-  tags = var.tags
-}

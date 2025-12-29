@@ -7,7 +7,7 @@ instance_type = "t3.medium"
 volume_size   = 50
 
 cluster_name = "prime-eks-prod"
-cluster_version = "1.29" 
+cluster_version = "1.34" 
 environment = "production"
 
 tags = {

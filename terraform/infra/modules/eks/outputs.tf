@@ -13,3 +13,10 @@ output "cluster_ca_certificate" {
 output "oidc_provider_arn" {
   value = module.this.oidc_provider_arn
 }
+
+output "node_security_group_id" {
+  description = "EKS cluster security group ID"
+  value       = module.this.node_security_group_id
+}
+
+

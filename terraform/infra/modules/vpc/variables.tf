@@ -24,3 +24,18 @@ variable "vpc_name" {
  description = "Name of the VPC"
  type        = string
 }
+
+variable "ec2-sg-name" {
+    description   = "Name prefix for ec2 resource"
+    type          = string 
+}
+variable "ingress_rules" {
+    type = list(object({
+        description      = string
+        from_port        = number
+        to_port          = number
+        protocol         = string
+        cidr_blocks      = list(string)
+    }))
+
+}

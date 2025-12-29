@@ -21,3 +21,14 @@ variable "eks_managed_node_groups" {
 variable "tags" {
   type = map(string)
 }
+
+variable "bastion_role_arn" {
+  description = "IAM role ARN of bation Ec2"
+  type = string
+  
+}
+
+variable "source_security_group_id" {
+  description = "Security group ID of bastion EC2"
+  type = string
+}
