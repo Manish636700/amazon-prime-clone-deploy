@@ -14,5 +14,6 @@ output "argocd_username" {
 
 output "argocd_password" {
   description = "Argo CD admin password"
-  value       = base64decode(data.kubernetes_secret_v1.argocd_admin.data["password"]) 
+  value       = data.kubernetes_secret_v1.argocd_admin.data["password"]
+  sensitive   = true
 }

@@ -41,4 +41,5 @@ output "argocd_username" {
 output "argocd_password" {
   description = "Argo CD admin password"
   value       = module.argocd.argocd_password
+  sensitive   = true
 }
