@@ -1,13 +1,13 @@
 #!/bin/bash
 
-sudo yum update -y
-sudo yum install -y git unzip curl
+yum update -y
+yum install -y git unzip curl
 
 yum install -y firewalld 
 
 if systemctl list-unit-files | grep -q firewalld; then
-  sudo systemctl stop firewalld || true
-  sudo systemctl disable firewalld || true
+  systemctl stop firewalld || true
+  systemctl disable firewalld || true
 fi
 
 

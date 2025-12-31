@@ -1,6 +1,6 @@
 
 [all_hosts]
-app1 ansible_host=100.27.194.184
+app1 ansible_host=3.90.185.233
 
 [docker_hosts]
 app1
@@ -25,5 +25,5 @@ app1
 
 [all:vars]
 ansible_user=ec2-user
-ansible_ssh_private_key_file=/home/mittal/.ssh/prod-devops-1767197037
+ansible_ssh_private_key_file=/home/mittal/.ssh/prod-devops-1767219123
 ansible_python_interpreter=/usr/bin/python3
