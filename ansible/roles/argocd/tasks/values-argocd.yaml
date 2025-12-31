@@ -1,7 +1,0 @@
-server:
-  service:
-    type: LoadBalancer
-
-  extraArgs:
-    # Disable TLS for simplicity; not recommended for production
-    - --insecure

@@ -5,7 +5,7 @@ module "this" {
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
-  cluster_endpoint_public_access  = false
+  cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = true
 
   vpc_id     = var.vpc_id
@@ -43,9 +43,25 @@ module "this" {
         }
       }
     }
+
+  # Argo cd
+
+  terraform_admin = {
+        principal_arn = "arn:aws:iam::084129281014:user/project"
+
+        policy_associations = {
+          admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = { type = "cluster" }
+          }
+        }
+      }
+
   } 
   tags = var.tags
 }
+
+
 
 resource "aws_security_group_rule" "bastion_to_eks" {
   type                     = "ingress"

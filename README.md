@@ -357,3 +357,10 @@ DevOps Engineer | AWS | Azure | Terraform | Ansible | CI/CD | Kubernetes
 
 ---
 
+
+
+inside the eks module 
+change 
+principal_arn = "arn:aws:iam::xxxxxxxxxxxxxxxxxxxxx"
+
+and same rbac

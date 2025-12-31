@@ -57,11 +57,3 @@
     - grafana
   tags:
     - grafana
-
-- name: Install ArgoCD
-  hosts: argocd
-  gather_facts: no
-  roles:
-    - argocd
-  tags:
-    - argocd

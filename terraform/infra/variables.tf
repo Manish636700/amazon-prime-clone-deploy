@@ -93,3 +93,20 @@ variable "tags" {
   description = "common resource tags"
   type        = map(string)
 }
+
+variable "private_key_path" {
+  default = " SSH private key path"
+  type        = string 
+}
+
+variable "namespace" {
+  description = "Namespace for Argo CD"
+  type        = string
+  default     = "argocd"
+}
+
+variable "chart_version" {
+    description = "Argo CD Helm chart version"
+    type        = string
+    default     = "6.7.14"    
+}

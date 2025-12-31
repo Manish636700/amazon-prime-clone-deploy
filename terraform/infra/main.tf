@@ -64,3 +64,11 @@ module "ecr" {
 }
 
 
+module "argocd" {
+  source = "./modules/argocd"
+
+  namespace     = var.namespace
+  chart_version = var.chart_version
+
+  depends_on = [ module.eks , module.bastion_ec2 ]
+}

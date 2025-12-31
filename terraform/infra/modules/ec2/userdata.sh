@@ -1,14 +1,21 @@
 #!/bin/bash
 
-yum install -y firewalld git unzip curl
-systemctl start firewalld
-systemctl enable firewalld
+sudo yum update -y
+sudo yum install -y git unzip curl
 
-firewall-cmd --add-port=8080/tcp --permanent
-firewall-cmd --add-port=3000/tcp --permanent
-firewall-cmd --add-port=9090/tcp --permanent
-firewall-cmd --add-port=9000/tcp --permanent
-firewall-cmd --reload
+yum install -y firewalld 
+
+if systemctl list-unit-files | grep -q firewalld; then
+  sudo systemctl stop firewalld || true
+  sudo systemctl disable firewalld || true
+fi
+
+
+# firewall-cmd --add-port=8080/tcp --permanent
+# firewall-cmd --add-port=3000/tcp --permanent
+# firewall-cmd --add-port=9090/tcp --permanent
+# firewall-cmd --add-port=9000/tcp --permanent
+# firewall-cmd --reload
 
 curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
 unzip awscliv2.zip
@@ -19,8 +26,8 @@ curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.t
 chmod +x kubectl
 mv kubectl /usr/local/bin/
 
-mkdir -p /home/ec2-user/.kube
-chown ec2-user:ec2-user /home/ec2-user/.kube
+sudo mkdir -p /home/ec2-user/.kube
+sudo chown ec2-user:ec2-user /home/ec2-user/.kube
 
 sudo -u ec2-user aws eks update-kubeconfig \
   --region us-east-1 \

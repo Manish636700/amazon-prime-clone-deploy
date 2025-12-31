@@ -1,83 +1,151 @@
 pipeline {
     agent any
     
-    environment {
-        IMAGE_NAME = "manishdevops/app"
-        IMAGE_TAG  = "${BUILD_NUMBER}"
-        SONAR_ENV  = "sonarqube"
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timeout(time: 30, unit: 'MINUTES')
+        skipStagesAfterUnstable()
     }
     
+    environment {
+        AWS_REGION              = "us-east-1"
+        ECR_REPO                = "amazon-prime-prod"
+        IMAGE_TAG               = "${BUILD_NUMBER}"
+        AWS_ACCESS_KEY          = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY   = credentials('aws-secret-key')
+       }
+
     stages {
-        stage('checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Manish636700/amazon-prime-clone-deploy.git'
+                git branch: 'main',
+                url: 'https://github.com/Manish636700/amazon-prime-clone-deploy.git'
             }
         }
         
-        stage('SonarQube Analysis') {
+        stage('Install Dependencies'){
             steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv() {
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
-                }
+                sh 'npm ci'
             }
         }
-        stage('Quality Gate') {
+        
+        stage('Unit Tests & Coverage'){
             steps {
-                timeout(time: 2, unit: "MINUTES") {
+                sh 'npm test -- --coverage --passWithNoTests'
+            }
+        }
+        
+        stage('SonarQube Analysis'){
+            environment {
+                scannerHome   = tool 'sonar-scanner'
+            }
+            steps {
+               withSonarQubeEnv('sonarqube') {
+                   sh """ 
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=amazon-prime-clone \
+                    -Dsonar.sources=.\
+                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                    """
+               }
+            }
+        }
+        stage('Quality Gate (BLOCKING)'){
+            steps {
+                timeout(time: 10, unit: 'MINUTES'){
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
-        stage('Trivy File System Scan') {
+        
+        stage('Dependency & Secret Scan') {
             steps {
-                sh """ 
-                trivy fs --severity HIGH,CRITICAL .
-                """
+                sh ''' 
+                trivy fs \
+                --scanners vuln,secret,license \
+                --severity HIGH,CRITICAL \
+                --ignore-unfixed \
+                --exit-code 1 \
+                .
+                '''
             }
         }
-        
-        stage("Build Docker Image") {
+    
+    }
+}
+
+
+        stage('Docker Build (Non-Root Image)') {
             steps {
-                sh """ 
-                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
             }
         }
-        
-        stage('Trivy Image Scan') {
+
+        stage('Container Image Scan (BLOCKING)') {
             steps {
-                sh """
-                trivy image --severity HIGH, CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                sh '''
+                  trivy image \
+                  $ECR_REPO:$IMAGE_TAG \
+                  --severity HIGH,CRITICAL \
+                  --exit-code 1
+                '''
             }
         }
-        
-        stage('Push Docker Image') {
+
+        /* -------------------- ARTIFACT TRUST -------------------- */
+
+        stage('Login to AWS ECR') {
+            environment {
+                AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+            }
             steps {
-                withCredentials ([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                    )])
-                    {
-                        sh """ 
-                        docker login -u $DOCKER_USER -p $DOCKER_PASS
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        """
-                    }
+                sh '''
+                aws ecr get-login-password --region $AWS_REGION |
+                docker login --username AWS \
+                --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
+            }
+        }
+
+        stage('Push Image to ECR (Non-Prod)') {
+            steps {
+                sh '''
+                docker tag $ECR_REPO:$IMAGE_TAG \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+                docker push \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Sign Image (Cosign)') {
+            environment {
+                COSIGN_PASSWORD = credentials('cosign-key')
+            }
+            steps {
+                sh '''
+                cosign sign \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                '''
             }
         }
     }
-    
+
+    /* -------------------- POST -------------------- */
+
     post {
         success {
-            echo "Continuous Integration Completed Successfully"
+            echo "✅ Enterprise CI completed successfully"
         }
         failure {
-            echo "Continuous Pipeline Faild"
+            echo "❌ Pipeline blocked by Quality/Security gate"
+        }
+        always {
+            cleanWs()
         }
     }
 }

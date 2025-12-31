@@ -3,13 +3,15 @@ vpc_cidr        = "10.0.0.0/16"
 public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
 private_subnets = ["10.0.11.0/24", "10.0.12.0/24"]
 
-instance_type = "t3.medium"
+instance_type = "t3.large"
 volume_size   = 50
 
 cluster_name = "prime-eks-prod"
 cluster_version = "1.34" 
 environment = "production"
 
+namespace     = "argocd"
+chart_version = "6.7.14"
 tags = {
   Environment = "production"
   Project     = "amazon-prime-clone"

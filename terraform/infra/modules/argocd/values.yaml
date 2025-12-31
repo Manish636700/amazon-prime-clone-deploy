@@ -1,0 +1,20 @@
+server:
+  service:
+    type: LoadBalancer
+
+  extraArgs:
+     - --insecure 
+  
+configs:
+  params:
+    server.insecure: true
+
+
+applicationSet:
+  enabled: true
+
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1

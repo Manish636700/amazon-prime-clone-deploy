@@ -27,3 +27,18 @@ output "eks_cluster_endpoint" {
 output "eks_oidc_provider_arn" {
   value = module.eks.oidc_provider_arn
 }
+
+output "argocd_url" {
+  description = "Argo CD Server URL"
+  value       = module.argocd.argocd_url
+}
+
+output "argocd_username" {
+  description = "Argo CD admin username"
+  value       = module.argocd.argocd_username
+}
+
+output "argocd_password" {
+  description = "Argo CD admin password"
+  value       = module.argocd.argocd_password
+}

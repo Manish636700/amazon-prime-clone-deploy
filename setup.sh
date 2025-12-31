@@ -19,6 +19,8 @@ TIMESTAMP=$(date +%s)
 KEY_NAME="${PROJECT_NAME}-${TIMESTAMP}"
 SSH_DIR="$HOME/.ssh"
 KEY_PATH="${SSH_DIR}/${KEY_NAME}"
+export TF_VAR_private_key_path="${KEY_PATH}"
+
 
 ROOT_DIR="$(pwd)"
 TERRAFORM_DIR="${ROOT_DIR}/terraform"
@@ -55,6 +57,7 @@ echo "✅ SSH Key Generated Successfully"
 export TF_VAR_key_name="${KEY_NAME}"
 TFVARS_FILE="${INFRA_DIR}/terraform.auto.tfvars" 
 cat <<EOF > "${TFVARS_FILE}" 
+
 key_name = "${KEY_NAME}" 
 public_key = "$(cat ${KEY_PATH}.pub)" 
 EOF
@@ -153,8 +156,6 @@ app1
 [grafana]
 app1
 
-[argocd]
-app1
 
 [all:vars]
 ansible_user=${SSH_USER}
