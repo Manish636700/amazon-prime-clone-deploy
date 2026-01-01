@@ -12,6 +12,8 @@ resource "aws_s3_bucket_versioning" "versioning" {
     versioning_configuration {
         status = "Enabled"
         mfa_delete = "Disabled"
+    # MFA Delete cannot be enabled via Terraform (AWS limitation).
+    # Deletion protection is enforced via IAM and bucket policies.
     }
 }
 
