@@ -1,11 +1,20 @@
-FROM node:18-alpine AS build
+FROM node:18-alpine3.19
+
 WORKDIR /app
+
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 COPY package*.json ./
+
+
 RUN npm ci --omit=dev
+
 COPY . .
 
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=build /app .
+
+USER appuser
+
 EXPOSE 3000
+
 CMD ["npm","start"]
