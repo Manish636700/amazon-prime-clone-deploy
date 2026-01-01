@@ -357,6 +357,21 @@ DevOps Engineer | AWS | Azure | Terraform | Ansible | CI/CD | Kubernetes
 
 ---
 
+if use can not access tool then open ec2 instance and run this command
+
+dnf install -y firewalld
+systemctl enable firewalld
+systemctl start firewalld
+
+
+firewall-cmd --add-port=8080/tcp --permanent
+firewall-cmd --add-port=3000/tcp --permanent
+firewall-cmd --add-port=9090/tcp --permanent
+firewall-cmd --add-port=9000/tcp --permanent
+firewall-cmd --add-port=443/tcp --permanent
+firewall-cmd --add-port=22/tcp --permanent
+firewall-cmd --reload
+
 
 
 inside the eks module 
@@ -364,3 +379,4 @@ change
 principal_arn = "arn:aws:iam::xxxxxxxxxxxxxxxxxxxxx"
 
 and same rbac
+

@@ -1,21 +1,21 @@
 #!/bin/bash
 
-yum update -y
-yum install -y git unzip curl
-
-yum install -y firewalld 
-
-if systemctl list-unit-files | grep -q firewalld; then
-  systemctl stop firewalld || true
-  systemctl disable firewalld || true
-fi
+dnf update -y
+dnf install -y git unzip curl
 
 
-# firewall-cmd --add-port=8080/tcp --permanent
-# firewall-cmd --add-port=3000/tcp --permanent
-# firewall-cmd --add-port=9090/tcp --permanent
-# firewall-cmd --add-port=9000/tcp --permanent
-# firewall-cmd --reload
+dnf install -y firewalld
+systemctl enable firewalld
+systemctl start firewalld
+
+
+firewall-cmd --add-port=8080/tcp --permanent
+firewall-cmd --add-port=3000/tcp --permanent
+firewall-cmd --add-port=9090/tcp --permanent
+firewall-cmd --add-port=9000/tcp --permanent
+firewall-cmd --add-port=443/tcp --permanent
+firewall-cmd --add-port=22/tcp --permanent
+firewall-cmd --reload
 
 curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
 unzip awscliv2.zip

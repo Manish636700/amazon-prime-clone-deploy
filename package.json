@@ -23,6 +23,10 @@
       "react-app/jest"
     ]
   },
+  "overrides": {
+    "@babel/traverse": "7.23.2",
+    "form-data": "3.0.4"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
