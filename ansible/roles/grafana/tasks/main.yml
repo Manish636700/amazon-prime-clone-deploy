@@ -55,3 +55,17 @@
 - name: Display Grafana status
   debug:
     msg: "Grafana service status: {{ grafana_status.stdout }}"
+
+
+- name: Ensure firewalld is installed and running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Add firewall rule for Jenkins
+  firewalld:
+    port: 3000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes

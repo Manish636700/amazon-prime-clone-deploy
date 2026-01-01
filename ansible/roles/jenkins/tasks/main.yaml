@@ -31,6 +31,30 @@
     state: started
     enabled: yes
 
+- name: Add Jenkins user to docker group
+  user:
+    name: jenkins
+    groups: docker
+    append: yes
+
+- name: Restart Jenkins to apply group changes
+  service:
+    name: jenkins
+    state: restarted
+
+- name: Ensure firewalld is installed and running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Add firewall rule for Jenkins
+  firewalld:
+    port: 8080/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
 - name: Read Jenkins initial admin PASSWORD
   command: cat /var/lib/jenkins/secrets/initialAdminPassword
   register: jenkins_password

@@ -9,6 +9,8 @@ systemctl enable firewalld
 systemctl start firewalld
 
 
+
+
 firewall-cmd --add-port=8080/tcp --permanent
 firewall-cmd --add-port=3000/tcp --permanent
 firewall-cmd --add-port=9090/tcp --permanent

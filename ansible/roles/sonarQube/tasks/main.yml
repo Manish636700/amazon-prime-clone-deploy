@@ -84,3 +84,16 @@
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: Ensure firewalld is installed and running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Add firewall rule for Jenkins
+  firewalld:
+    port: 9000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
