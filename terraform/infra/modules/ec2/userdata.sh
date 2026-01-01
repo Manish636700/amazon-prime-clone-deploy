@@ -24,6 +24,13 @@ unzip awscliv2.zip
 ./aws/install
 rm -rf aws awscliv2.zip
 
+sudo curl -Lo /usr/local/bin/cosign \
+https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+
+sudo chmod +x /usr/local/bin/cosign
+cosign version
+
+
 curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
 chmod +x kubectl
 mv kubectl /usr/local/bin/
