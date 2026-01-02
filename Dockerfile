@@ -11,10 +11,7 @@ RUN npm run build
 # ---------- Runtime Stage ----------
 FROM nginx:alpine
 
-# Remove default nginx content
 RUN rm -rf /usr/share/nginx/html/*
-
-# Copy React build output
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
