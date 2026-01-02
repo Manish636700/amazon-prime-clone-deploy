@@ -1,0 +1,8 @@
+resources:
+- deployment.yaml
+- service.yaml
+
+images:
+- name: amazon-prime-clone-repo
+  newName: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/amazon-prime-clone-repo
+  newTag: "1"
