@@ -1,17 +1,17 @@
 # ---------- Build Stage ----------
 FROM node:18-bullseye AS build
-
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install
+
+# CI-safe install (no hanging)
+RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
 # ---------- Runtime Stage ----------
 FROM nginx:alpine
-
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/build /usr/share/nginx/html
 
