@@ -4,5 +4,5 @@ resources:
 
 images:
 - name: amazon-prime-prod
-  newName: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/amazon-prime-prod
-  newTag: "14"
+  newName: 084129281014.dkr.ecr.us-east-1.amazonaws.com/amazon-prime-prod
+  newTag: "15"
