@@ -1,5 +1,6 @@
-# -------- Build Stage --------
-FROM node:18-alpine AS build
+# ---------- Build Stage ----------
+FROM node:18-bullseye AS build
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -8,7 +9,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# -------- Runtime Stage --------
+# ---------- Runtime Stage ----------
 FROM nginx:alpine
 
 RUN rm -rf /usr/share/nginx/html/*
