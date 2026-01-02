@@ -3,6 +3,6 @@ resources:
 - service.yaml
 
 images:
-- name: amazon-prime-clone-repo
-  newName: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/amazon-prime-clone-repo
-  newTag: "12"
+- name: amazon-prime-prod
+  newName: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/amazon-prime-prod
+  newTag: "1"
