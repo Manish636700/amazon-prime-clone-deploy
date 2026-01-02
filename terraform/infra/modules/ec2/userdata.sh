@@ -1,10 +1,10 @@
 #!/bin/bash
 
-dnf update -y
-dnf install -y git unzip curl
+sudo dnf update -y
+sudo dnf install -y git unzip curl
 
 
-dnf install -y firewalld
+sudo dnf install -y firewalld
 systemctl enable firewalld
 systemctl start firewalld
 
