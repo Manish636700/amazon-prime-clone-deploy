@@ -3,7 +3,9 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+
+# IMPORTANT: install devDependencies for build
+RUN npm ci --include=dev
 
 COPY . .
 RUN npm run build
