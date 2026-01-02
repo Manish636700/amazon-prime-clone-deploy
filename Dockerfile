@@ -2,7 +2,7 @@ FROM node:18-bullseye AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=optional
+RUN npm ci --omit=optional --no-audit --no-fund
 
 COPY . .
 ENV NODE_OPTIONS=--max-old-space-size=4096
