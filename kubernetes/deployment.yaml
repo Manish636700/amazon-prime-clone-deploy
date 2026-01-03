@@ -20,5 +20,5 @@ spec:
         - name: amazon-prime-clone-container
           image: amazon-prime-prod
           ports:
-            - containerPort: 3000
+            - containerPort: 80
             
